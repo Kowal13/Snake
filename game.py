@@ -16,6 +16,7 @@ class Game:
     def run(self):
         while not self.is_game_over:
             self.play_step()
+        print(self.score)
         pygame.quit()
 
     def check_events(self):
@@ -38,6 +39,9 @@ class Game:
             if event.type == pygame.QUIT:
                 self.esc_key = True
 
+    def reset_keys(self):
+        self.right_key, self.left_key, self.down_key, self.up_key, self.esc_key = False, False, False, False, False
+
     def check_if_game_is_over(self):
         if self.snake.is_collision() or self.snake.is_out_of_boundary() or self.esc_key:
             return True
@@ -47,23 +51,29 @@ class Game:
         self.check_events()
         key_arrows = [self.right_key, self.left_key, self.up_key, self.down_key]
         direction = self.movement.get_direction(key_arrows, self.snake, self.apple)  # get direction as a tuple
-        self.snake.move(direction, self.apple.location)  # move the snake given the direction
 
-        self.is_game_over = self.check_if_game_is_over()
+        if direction is not None:
+            self.snake.move(direction, self.apple.location)  # move the snake given the direction
 
-        if not self.is_game_over:
-            # check if apple was eaten and place a new one if it was
-            was_apple_eaten = self.snake.was_apple_eaten(self.apple.location)
-            if was_apple_eaten:
-                self.score += 1
-                snake_area = [self.snake.head] + self.snake.body
-                self.apple.place_food(snake_area)
+            self.is_game_over = self.check_if_game_is_over()
 
-            # display new location of the snake and apple, change score
-            self.display.update(self.snake, self.apple, self.score)
+            if not self.is_game_over:
+                # check if apple was eaten and place a new one if it was
+                was_apple_eaten = self.snake.was_apple_eaten(self.apple.location)
+                if was_apple_eaten:
+                    self.score += 1
+                    snake_area = [self.snake.head] + self.snake.body
+                    self.apple.place_food(snake_area)
 
-            # makes the game run max param.FPS frames per sec
-            self.clock.tick(param.FPS)
+                # display new location of the snake and apple, change score
+                self.display.update(self.snake, self.apple, self.score)
+
+                # makes the game run max param.FPS frames per sec
+                self.clock.tick(param.FPS)
+
+        else:
+            print("no path found")
+            self.is_game_over = True
 
 
 
