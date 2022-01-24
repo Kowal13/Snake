@@ -3,22 +3,22 @@ import param
 
 class Snake:
     def __init__(self):
-        self.head = (int(param.WIDTH/2), int(param.HEIGHT/2))
+        self.head = (int(param.WIDTH/2), int(param.HEIGHT/2))  # (x , y)
         self.body = [(self.head[0] - 1, self.head[1]), (self.head[0] - 2, self.head[1])]
 
-    def is_out_of_boundary(self):
-        if self.head[0] > param.WIDTH - 1:
+    def is_out_of_boundary(self, point):
+        if point[0] > param.WIDTH - 1:
             return True
-        elif self.head[0] < 0:
+        elif point[0] < 0:
             return True
-        elif self.head[1] > param.HEIGHT - 1:
+        elif point[1] > param.HEIGHT - 1:
             return True
-        elif self.head[1] < 0:
+        elif point[1] < 0:
             return True
         return False
 
-    def is_collision(self):
-        if self.head in self.body:
+    def is_collision(self, point):
+        if point in self.body:
             return True
         return False
 

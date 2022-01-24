@@ -3,21 +3,38 @@ import param
 
 
 class Game:
-    def __init__(self, snake, apple, display, movement):
-        self.snake = snake
-        self.apple = apple
-        self.display = display
+    def __init__(self, snake, apple, display, movement=0):
+        self.snake = snake()
+        self.apple = apple()
+        self.direction = (1,0)
+        self.snake_clone = snake
+        self.apple_clone = apple
+        self.display = display()
         self.movement = movement
         self.clock = pygame.time.Clock()
         self.is_game_over = False
         self.score = 0
-        self.esc_key, self.right_key, self.left_key, self.down_key, self.up_key = False, False, False, False, False
+        self.count = 0
+        self.right_key, self.left_key, self.down_key, self.up_key = False, False, False, False
 
     def run(self):
         while not self.is_game_over:
-            self.play_step()
-        print(self.score)
-        pygame.quit()
+            if self.count == 0:
+                self.display.update(self.snake, self.apple, self.score)
+                self.clock.tick(param.FPS)
+                self.count += 1
+            else:
+                self.play_step()
+
+    def reset(self):
+        self.count = 0
+        self.reset_keys()
+        self.right_key = True
+        self.direction = (1, 0)
+        self.score = 0
+        self.snake = self.snake_clone()
+        self.apple = self.apple_clone()
+
 
     def check_events(self):
         for event in pygame.event.get():
@@ -35,26 +52,33 @@ class Game:
                     self.up_key = True
                     self.left_key, self.down_key, self.right_key = False, False, False
                 elif event.key == pygame.K_ESCAPE:
-                    self.esc_key = True
+                    print(self.score)
+                    pygame.quit()
+                    quit()
             if event.type == pygame.QUIT:
-                self.esc_key = True
+                print(self.score)
+                pygame.quit()
+                quit()
 
     def reset_keys(self):
-        self.right_key, self.left_key, self.down_key, self.up_key, self.esc_key = False, False, False, False, False
+        self.right_key, self.left_key, self.down_key, self.up_key = False, False, False, False
 
     def check_if_game_is_over(self):
-        if self.snake.is_collision() or self.snake.is_out_of_boundary() or self.esc_key:
+        if self.snake.is_collision(self.snake.head) or self.snake.is_out_of_boundary(self.snake.head):
             return True
         return False
 
-    def play_step(self):
+    def play_step(self, direction=None):
         self.check_events()
         key_arrows = [self.right_key, self.left_key, self.up_key, self.down_key]
-        direction = self.movement.get_direction(key_arrows, self.snake, self.apple)  # get direction as a tuple
+        if self.movement != 0:
+            direction = self.movement.get_direction(key_arrows, self.snake, self.apple)  # get direction as a tuple
+
+        self.direction = direction
 
         if direction is not None:
             self.snake.move(direction, self.apple.location)  # move the snake given the direction
-
+            reward = 1
             self.is_game_over = self.check_if_game_is_over()
 
             if not self.is_game_over:
@@ -62,6 +86,7 @@ class Game:
                 was_apple_eaten = self.snake.was_apple_eaten(self.apple.location)
                 if was_apple_eaten:
                     self.score += 1
+                    reward = 20
                     snake_area = [self.snake.head] + self.snake.body
                     self.apple.place_food(snake_area)
 
@@ -71,9 +96,22 @@ class Game:
                 # makes the game run max param.FPS frames per sec
                 self.clock.tick(param.FPS)
 
+            elif self.is_game_over:
+                self.is_game_over = False
+                if self.movement != 0:
+                    self.reset()
+                reward = -20
+                return reward, True, self.score
+
+            return reward, self.is_game_over, self.score
+
         else:
-            print("no path found")
+            print("path not found")
             self.is_game_over = True
+            if self.is_game_over:
+                self.reset()
+                self.is_game_over = False
+
 
 
 

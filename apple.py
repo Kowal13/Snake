@@ -5,7 +5,7 @@ import random
 class Apple:
     def __init__(self):
         self.location = (0, 0)
-        self.place_food([(16, 12), (15, 12), (14, 12)])
+        self.place_food([(int(param.WIDTH / 2), int(param.HEIGHT / 2)), (int(param.WIDTH / 2)-1, int(param.HEIGHT / 2)), (int(param.WIDTH / 2)-2, int(param.HEIGHT / 2))])
 
     def place_food(self, snake_area):
         x = random.randint(0, (param.WIDTH - 1))
