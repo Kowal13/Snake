@@ -5,6 +5,9 @@ class HumanMovement:
     def __init__(self):
         self.direction = (1, 0)
 
+    def reset(self):
+        self.direction = (1, 0)
+
     def get_direction(self, key_arrows, snake=None, apple=None):
         direction = None
         right, left, up, down = key_arrows

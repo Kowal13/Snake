@@ -11,13 +11,39 @@ class Game:
         self.clock = pygame.time.Clock()
         self.is_game_over = False
         self.score = 0
+        self.game_iteration = 1
+        self.plot_score = []
+        self.plot_iteration = []
+        self.plot_mean_score = []
         self.esc_key, self.right_key, self.left_key, self.down_key, self.up_key = False, False, False, False, False
 
-    def run(self):
+    def run(self, run_forever=True):
+        self.game_iteration += 1
         while not self.is_game_over:
+            self.check_events()
             self.play_step()
+            if self.is_game_over:
+                if self.esc_key:
+                    pygame.quit()
+                    quit()
+                if run_forever:
+                    self.reset()
+                    self.is_game_over = False
         print(self.score)
         pygame.quit()
+
+    def reset(self):
+        self.game_iteration += 1
+        self.plot_score.append(self.score)
+        self.plot_iteration.append(str(self.game_iteration))
+        self.display.reset()
+        self.snake.__init__()
+        self.apple.__init__()
+        self.plot_mean_score.append(sum(self.plot_score) / len(self.plot_iteration))
+        self.display.score_plot(self.plot_score, self.plot_iteration, self.plot_mean_score)
+        self.score = 0
+        self.reset_keys()
+        self.movement.reset()
 
     def check_events(self):
         for event in pygame.event.get():
@@ -48,7 +74,9 @@ class Game:
         return False
 
     def play_step(self):
-        self.check_events()
+        # makes the game run max param.FPS frames per sec
+        self.clock.tick(param.FPS)
+
         key_arrows = [self.right_key, self.left_key, self.up_key, self.down_key]
         direction = self.movement.get_direction(key_arrows, self.snake, self.apple)  # get direction as a tuple
 
@@ -68,12 +96,6 @@ class Game:
                 # display new location of the snake and apple, change score
                 self.display.update(self.snake, self.apple, self.score)
 
-                # makes the game run max param.FPS frames per sec
-                self.clock.tick(param.FPS)
-
         else:
             print("no path found")
             self.is_game_over = True
-
-
-

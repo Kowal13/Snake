@@ -6,5 +6,5 @@ from human_movement import HumanMovement
 from a_star_movement import AStarMovement
 
 
-Game(Snake(), Apple(), Display(), HumanMovement()).run()
-#Game(Snake(), Apple(), Display(), AStarMovement()).run()
+#Game(Snake(), Apple(), Display(), HumanMovement()).run()
+Game(Snake(), Apple(), Display(), AStarMovement()).run()
