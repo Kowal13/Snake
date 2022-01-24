@@ -6,7 +6,8 @@ class Game:
     def __init__(self, snake, apple, display, movement=0):
         self.snake = snake()
         self.apple = apple()
-        self.direction = (1,0)
+        self.direction = (1, 0)
+        self.frame_iteration = 0
         self.snake_clone = snake
         self.apple_clone = apple
         self.display = display()
@@ -15,6 +16,7 @@ class Game:
         self.is_game_over = False
         self.score = 0
         self.count = 0
+        self.frame_iteration = 0
         self.right_key, self.left_key, self.down_key, self.up_key = False, False, False, False
 
     def run(self):
@@ -27,6 +29,7 @@ class Game:
                 self.play_step()
 
     def reset(self):
+        self.frame_iteration = 0
         self.count = 0
         self.reset_keys()
         self.right_key = True
@@ -69,6 +72,7 @@ class Game:
         return False
 
     def play_step(self, direction=None):
+        self.frame_iteration += 1
         self.check_events()
         key_arrows = [self.right_key, self.left_key, self.up_key, self.down_key]
         if self.movement != 0:
@@ -78,15 +82,16 @@ class Game:
 
         if direction is not None:
             self.snake.move(direction, self.apple.location)  # move the snake given the direction
-            reward = 1
-            self.is_game_over = self.check_if_game_is_over()
+            reward = 0
+            if self.check_if_game_is_over() is True or self.frame_iteration > 100*len(self.snake.body):
+                self.is_game_over = True
 
             if not self.is_game_over:
                 # check if apple was eaten and place a new one if it was
                 was_apple_eaten = self.snake.was_apple_eaten(self.apple.location)
                 if was_apple_eaten:
                     self.score += 1
-                    reward = 20
+                    reward = 10
                     snake_area = [self.snake.head] + self.snake.body
                     self.apple.place_food(snake_area)
 
@@ -100,7 +105,7 @@ class Game:
                 self.is_game_over = False
                 if self.movement != 0:
                     self.reset()
-                reward = -20
+                reward = -10
                 return reward, True, self.score
 
             return reward, self.is_game_over, self.score

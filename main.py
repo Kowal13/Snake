@@ -10,4 +10,5 @@ from agent import Agent, train
 if __name__ == "__main__":
     # Game(Snake, Apple, Display, HumanMovement()).run()
     #Game(Snake, Apple, Display, AStarMovement()).run()
+    # Game(Snake, Apple, Display, AStarMovement()).run()
     train()
