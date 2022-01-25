@@ -18,54 +18,10 @@ class Agent:
     def __init__(self):
         self.n_games = 0
         self.epsilon = 0  # randomness
-        self.gamma = 0.9 # discount rate
+        self.gamma = 0.9  # discount rate
         self.memory = deque(maxlen=MAX_MEMORY)  # popleft()
         self.model = Linear_QNet(12, 256, 4)
         self.trainer = QTrainer(self.model, lr=LR, gamma=self.gamma)
-
-    def get_state(self, game):
-        head = game.snake.head
-
-        point_l = (head[0] - 1, head[1])
-        point_r = (head[0] + 1, head[1])
-        point_u = (head[0], head[1] - 1)
-        point_d = (head[0], head[1] + 1)
-
-        dir_l = game.direction == (-1, 0)
-        dir_r = game.direction == (1, 0)
-        dir_u = game.direction == (0, -1)
-        dir_d = game.direction == (0, 1)
-
-        state = [
-            # Danger up
-            game.snake.is_collision(point_u) or
-            game.snake.is_out_of_boundary(point_u),
-
-            # Danger down
-            game.snake.is_collision(point_d) or
-            game.snake.is_out_of_boundary(point_d),
-
-            # Danger left
-            game.snake.is_collision(point_l) or
-            game.snake.is_out_of_boundary(point_l),
-
-            # Danger right
-            game.snake.is_collision(point_r) or
-            game.snake.is_out_of_boundary(point_r),
-
-            # Move direction
-            dir_l,
-            dir_r,
-            dir_u,
-            dir_d,
-
-            # Food location
-            game.apple.location[0] < game.snake.head[0],  # food left
-            game.apple.location[0] > game.snake.head[0],  # food right
-            game.apple.location[1] < game.snake.head[1],  # food up
-            game.apple.location[1] > game.snake.head[1]  # food down
-        ]
-        return np.array(state, dtype=int)
 
     def remember(self, state, action, reward, next_state, game_over):
         self.memory.append((state, action, reward, next_state, game_over))  # popleft if MAX_MEMORY is reached
@@ -99,6 +55,7 @@ class Agent:
 
         return final_move
 
+
 def train():
     total_score = 0
     record = 0
@@ -106,7 +63,7 @@ def train():
     game = Game(Snake, Apple, Display)
     while True:
         # get old state
-        state_old = agent.get_state(game)
+        state_old = game.get_state()
         # get move
         final_move = agent.get_action(state_old)
 
@@ -120,7 +77,7 @@ def train():
             direction = (-1, 0)
 
         reward, game_over, score = game.play_step(direction)
-        state_new = agent.get_state(game)
+        state_new = game.get_state()
 
         # train short memory
         agent.train_short_memory(state_old, final_move, reward, state_new, game_over)
