@@ -42,6 +42,9 @@ class Node:
 class AStarMovement:
     def __init__(self):
         self.direction_list = []
+
+    def reset(self):
+        self.direction_list = []
     @staticmethod
     def clean_open_set(open_set, current_node):
 

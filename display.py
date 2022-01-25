@@ -11,6 +11,7 @@ class Display:
         self.font = pygame.font.SysFont("comicsans", 40)
         self.display = pygame.display.set_mode((parameters.WIDTH * parameters.BLOCK_SIZE, parameters.HEIGHT * parameters.BLOCK_SIZE))
         pygame.display.set_caption("Snake")
+        self.score_plot(0, 0, 0)
 
     def update(self, snake, apple, score):
         self.display.fill(parameters.BLACK)

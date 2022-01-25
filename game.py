@@ -2,11 +2,13 @@ import pygame
 import parameters
 import numpy as np
 
+
 class Game:
-    def __init__(self, snake, apple, display, movement=0):
+    def __init__(self, snake, apple, display, movement=0, timer=True):
         self.snake = snake()
         self.apple = apple()
         self.direction = (1, 0)
+        self.frame_iteration = 0
         self.snake_clone = snake
         self.apple_clone = apple
         self.display = display()
@@ -21,7 +23,7 @@ class Game:
         self.plot_iteration = []
         self.plot_score = []
         self.plot_mean_score = []
-
+        self.timer = timer
 
     def run(self):
         while not self.is_game_over:
@@ -46,6 +48,8 @@ class Game:
         self.snake = self.snake_clone()
         self.apple = self.apple_clone()
         self.display.score_plot(self.plot_score, self.plot_iteration, self.plot_mean_score)
+        if self.movement != 0:
+            self.movement.reset()
 
     def check_events(self):
         for event in pygame.event.get():
@@ -77,6 +81,9 @@ class Game:
     def check_if_game_is_over(self):
         if self.snake.is_collision() or self.snake.is_out_of_boundary():
             return True
+        if self.timer:
+            if self.frame_iteration > 100 * len(self.snake.body):
+                return True
         return False
 
     def play_step(self, direction=None):
@@ -91,7 +98,7 @@ class Game:
         if direction is not None:
             self.snake.move(direction, self.apple.location)  # move the snake given the direction
             reward = 0
-            if self.check_if_game_is_over() is True or self.frame_iteration > 100*len(self.snake.body):
+            if self.check_if_game_is_over():
                 self.is_game_over = True
 
             if not self.is_game_over:
