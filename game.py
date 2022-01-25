@@ -1,6 +1,6 @@
 import pygame
-import param
-
+import parameters
+import numpy as np
 
 class Game:
     def __init__(self, snake, apple, display, movement=0):
@@ -17,17 +17,26 @@ class Game:
         self.count = 0
         self.frame_iteration = 0
         self.right_key, self.left_key, self.down_key, self.up_key = False, False, False, False
+        self.iteration = 0
+        self.plot_iteration = []
+        self.plot_score = []
+        self.plot_mean_score = []
+
 
     def run(self):
         while not self.is_game_over:
             if self.count == 0:
                 self.display.update(self.snake, self.apple, self.score)
-                self.clock.tick(param.FPS)
+                self.clock.tick(parameters.FPS)
                 self.count += 1
             else:
                 self.play_step()
 
     def reset(self):
+        self.plot_score.append(self.score)
+        self.plot_iteration.append(str(self.iteration))
+        self.plot_mean_score.append(sum(self.plot_score) / len(self.plot_iteration))
+        self.iteration += 1
         self.frame_iteration = 0
         self.count = 0
         self.reset_keys()
@@ -36,7 +45,7 @@ class Game:
         self.score = 0
         self.snake = self.snake_clone()
         self.apple = self.apple_clone()
-
+        self.display.score_plot(self.plot_score, self.plot_iteration, self.plot_mean_score)
 
     def check_events(self):
         for event in pygame.event.get():
@@ -66,7 +75,7 @@ class Game:
         self.right_key, self.left_key, self.down_key, self.up_key = False, False, False, False
 
     def check_if_game_is_over(self):
-        if self.snake.is_collision(self.snake.head) or self.snake.is_out_of_boundary(self.snake.head):
+        if self.snake.is_collision() or self.snake.is_out_of_boundary():
             return True
         return False
 
@@ -98,7 +107,7 @@ class Game:
                 self.display.update(self.snake, self.apple, self.score)
 
                 # makes the game run max param.FPS frames per sec
-                self.clock.tick(param.FPS)
+                self.clock.tick(parameters.FPS)
 
             elif self.is_game_over:
                 self.is_game_over = False
@@ -116,6 +125,45 @@ class Game:
                 self.reset()
                 self.is_game_over = False
 
+    def get_state(self):
 
+        point_l = (self.snake.head[0] - 1, self.snake.head[1])
+        point_r = (self.snake.head[0] + 1, self.snake.head[1])
+        point_u = (self.snake.head[0], self.snake.head[1] - 1)
+        point_d = (self.snake.head[0], self.snake.head[1] + 1)
 
+        dir_l = self.direction == (-1, 0)
+        dir_r = self.direction == (1, 0)
+        dir_u = self.direction == (0, -1)
+        dir_d = self.direction == (0, 1)
 
+        state = [
+            # Danger up
+            self.snake.is_collision(point_u) or
+            self.snake.is_out_of_boundary(point_u),
+
+            # Danger down
+            self.snake.is_collision(point_d) or
+            self.snake.is_out_of_boundary(point_d),
+
+            # Danger left
+            self.snake.is_collision(point_l) or
+            self.snake.is_out_of_boundary(point_l),
+
+            # Danger right
+            self.snake.is_collision(point_r) or
+            self.snake.is_out_of_boundary(point_r),
+
+            # Move direction
+            dir_l,
+            dir_r,
+            dir_u,
+            dir_d,
+
+            # Food location
+            self.apple.location[0] < self.snake.head[0],  # food left
+            self.apple.location[0] > self.snake.head[0],  # food right
+            self.apple.location[1] < self.snake.head[1],  # food up
+            self.apple.location[1] > self.snake.head[1]  # food down
+        ]
+        return np.array(state, dtype=int)
