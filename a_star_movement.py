@@ -1,4 +1,4 @@
-import param
+import parameters
 from random import randint
 
 
@@ -170,14 +170,14 @@ class AStarMovement:
         return path_list
 
     def get_maze(self, snake_body):
-        maze = [[0] * param.WIDTH for i in range(param.HEIGHT)]
+        maze = [[0] * parameters.WIDTH for i in range(parameters.HEIGHT)]
         for el in snake_body:
             maze[el[1]][el[0]] = 1
         return maze
 
     def get_path(self, snake, apple_location):
         maze = self.get_maze(snake.body)
-        path = self.astar(param.HEIGHT, param.WIDTH, snake.head, apple_location, obstacle_ratio=False, obstacle_list=snake.body)
+        path = self.astar(parameters.HEIGHT, parameters.WIDTH, snake.head, apple_location, obstacle_ratio=False, obstacle_list=snake.body)
         return path
 
     def path_to_direction_list(self, path):

@@ -1,37 +1,55 @@
-import param
+import parameters
 
 
 class Snake:
     def __init__(self):
-        self.head = (int(param.WIDTH/2), int(param.HEIGHT/2))  # (x , y)
+        self.head = (int(parameters.WIDTH / 2), int(parameters.HEIGHT / 2))  # (x , y)
         self.body = [(self.head[0] - 1, self.head[1]), (self.head[0] - 2, self.head[1])]
 
-    def is_out_of_boundary(self, point):
-        if point[0] > param.WIDTH - 1:
+    def is_out_of_boundary(self, point=None):
+
+        if point is None:
+            point = self.head
+
+        if point[0] > parameters.WIDTH - 1:
             return True
+
         elif point[0] < 0:
             return True
-        elif point[1] > param.HEIGHT - 1:
+
+        elif point[1] > parameters.HEIGHT - 1:
             return True
+
         elif point[1] < 0:
             return True
+
         return False
 
-    def is_collision(self, point):
+    def is_collision(self, point=None):
+
+        if point is None:
+            point = self.head
+
         if point in self.body:
             return True
+
         return False
 
     def was_apple_eaten(self, apple_location):
+
         if self.head == apple_location:
             return True
+
         return False
 
     def get_mask(self):
+
         dark_green = self.head
-        color_list = [(dark_green[0], dark_green[1], param.DARK_GREEN)]
+        color_list = [(dark_green[0], dark_green[1], parameters.DARK_GREEN)]
+
         for el in self.body:
-            color_list.append((el[0], el[1], param.GREEN))
+            color_list.append((el[0], el[1], parameters.GREEN))
+
         return color_list
 
     def move(self, direction, apple_location):
